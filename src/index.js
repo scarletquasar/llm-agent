@@ -1,18 +1,22 @@
 import * as tf from '@tensorflow/tfjs';
+// Define input, which has a size of 5 (not including batch dimension).
+const input = tf.input({shape: [1]});
 
-// Define a model for linear regression.
-const model = tf.sequential();
-model.add(tf.layers.dense({units: 1, inputShape: [1]}));
+// First dense layer uses relu activation.
+const denseLayer1 = tf.layers.dense({units: 10, activation: 'relu'});
+// Second dense layer uses softmax activation.
+const denseLayer2 = tf.layers.dense({units: 1, activation: 'softmax'});
 
-// Prepare the model for training: Specify the loss and the optimizer.
-model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
+// Obtain the output symbolic tensor by applying the layers on the input.
+const output = denseLayer2.apply(denseLayer1.apply(input));
 
-// Generate some synthetic data for training.
-const xs = tf.tensor2d([1, 2, 3, 4], [4, 1]);
-const ys = tf.tensor2d([1, 3, 5, 7], [4, 1]);
+// Create the model based on the inputs.
+const model = tf.model({inputs: input, outputs: output});
 
-// Train the model using the data.
-model.fit(xs, ys).then(() => {
-  // Use the model to do inference on a data point the model hasn't seen before:
-  model.predict(tf.tensor2d([5], [1, 1])).print();
-});
+// The model can be used for training, evaluation and prediction.
+// For example, the following line runs prediction with the model on
+// some fake data.
+
+const modelInput = tf.tensor([[2]]);
+modelInput.print()
+model.predict(modelInput).data().then(console.log);
